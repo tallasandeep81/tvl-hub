@@ -12,56 +12,39 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-  html,body{margin:0;height:100%;background:#12307A;font-family:system-ui,'Segoe UI',Arial,sans-serif;overflow:hidden}
-  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#F3F5F9;opacity:0;transition:opacity .3s}
-  iframe.ready{opacity:1}
-  .splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#fff;text-align:center;padding:24px}
+  html,body{margin:0;height:100%;background:#12307A;font-family:system-ui,'Segoe UI',Arial,sans-serif;color:#fff}
+  .splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:24px}
   .splash img{width:96px;height:96px;border-radius:22px;background:#fff}
   .splash b{font-size:20px}
   .splash small{opacity:.75;font-size:13px}
   .bar{width:140px;height:4px;border-radius:4px;background:rgba(255,255,255,.2);overflow:hidden}
   .bar i{display:block;width:40%;height:100%;background:#fff;border-radius:4px;animation:m 1.1s ease-in-out infinite}
   @keyframes m{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
-  .fb{display:none;margin-top:6px}
-  .fb a{display:inline-block;background:#fff;color:#12307A;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:12px}
-  .fb p{font-size:13px;opacity:.8;max-width:300px;margin:12px auto 0}
+  .btn{display:none;background:#fff;color:#12307A;text-decoration:none;font-weight:700;padding:12px 24px;border-radius:12px}
+  @media (prefers-reduced-motion:reduce){.bar i{animation:none}}
 </style>
 </head>
 <body>
-<div class="splash" id="splash">
+<div class="splash">
   <img src="icon-192.png" alt="TVL">
   <div><b>TVL Systems Hub</b><br><small>When Safety Matters</small></div>
   <div class="bar" id="bar"><i></i></div>
-  <div class="fb" id="fb">
-    <a id="openLink" href="#">Sign in and open hub</a>
-    <p>If the hub does not load, sign in with your transvalves.com Google account using the button above.</p>
-  </div>
+  <a class="btn" id="btn" href="#">Open hub</a>
 </div>
-<iframe id="hub" title="TVL Systems Hub" allow="clipboard-write"></iframe>
 
 <script>
-  // ▼ Paste your Apps Script web app URL (ends with /exec)
+  // ▼ Your Apps Script web app URL (ends with /exec)
   const HUB_URL = 'https://script.google.com/macros/s/AKfycbwTNepo8fsmBxgW0ozV3lo951BIaYXt_T6s6973oz-I0lUTskfzwto-I-WSTB8nf11iTQ/exec';
 
-  const frame = document.getElementById('hub');
-  document.getElementById('openLink').href = HUB_URL;
-  frame.src = HUB_URL;
+  // Open the hub directly (Google sign-in does not work inside an embedded frame)
+  const btn = document.getElementById('btn');
+  btn.href = HUB_URL;
+  setTimeout(() => location.replace(HUB_URL), 600);
 
-  let loaded = false;
-  window.addEventListener('message', e => {
-    if (e.data && e.data.tvlhub === 'ready') {
-      loaded = true;
-      frame.classList.add('ready');
-      document.getElementById('splash').style.display = 'none';
-    }
+  // If the user comes back to this screen, show a button instead of looping
+  window.addEventListener('pageshow', e => {
+    if (e.persisted) { document.getElementById('bar').style.display = 'none'; btn.style.display = 'inline-block'; }
   });
-  // If Google sign-in blocks the embedded view, offer a direct open
-  setTimeout(() => {
-    if (!loaded) {
-      document.getElementById('bar').style.display = 'none';
-      document.getElementById('fb').style.display = 'block';
-    }
-  }, 9000);
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
